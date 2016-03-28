@@ -3,15 +3,10 @@ package fr.troopy28.milledix;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.craftbukkit.libs.jline.internal.Log;
-import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitTask;
-import org.bukkit.scoreboard.DisplaySlot;
-import org.bukkit.scoreboard.Objective;
-import org.bukkit.scoreboard.Score;
-import org.bukkit.scoreboard.Scoreboard;
-import org.bukkit.scoreboard.ScoreboardManager;
 
 import fr.troopy28.milledix.objects.assistant.JSONReader;
+import fr.troopy28.milledix.objects.gameplay.GameScoreboardManager;
 import fr.troopy28.milledix.objects.gameplay.GameState;
 import fr.troopy28.milledix.objects.gameplay.GridAnalyser;
 import fr.troopy28.milledix.objects.gameplay.MDPlayer;
@@ -29,16 +24,8 @@ public class MilleDix extends Game<MDPlayer>{
 
 	private static MilleDix instance;
 	
-	//Scoreboard en général
-	private ScoreboardManager manager;
-	private Scoreboard board;
-	private Objective objective;
-	
-	//Scores du scoreboard. Sert à les afficher
-	private Score redScore;
-	private Score greenScore;
-	private Score timeScore;
-	private Score turnTimeScore;
+	//Scoreboard
+	private GameScoreboardManager scoreboardManager;
 	
 	//Tâches
 	private BukkitTask task;	
@@ -58,13 +45,8 @@ public class MilleDix extends Game<MDPlayer>{
 	public MilleDix(String gameCodeName, String gameName, String gameDescription, Class<MDPlayer> gamePlayerClass) {		
 		
 		super(gameCodeName, gameName, gameDescription, gamePlayerClass);
-		
+		scoreboardManager = new GameScoreboardManager();
 		jsr = new JSONReader();
-		this.manager = Bukkit.getScoreboardManager();
-		this.board = manager.getNewScoreboard();
-		this.objective = board.registerNewObjective("Scores", "dummy");
-		this.objective.setDisplayName(ChatColor.BOLD + "" + ChatColor.GOLD + "MilleDix!");
-		this.objective.setDisplaySlot(DisplaySlot.SIDEBAR);
 		instance = this;
 		getConfig();
 	}
@@ -167,51 +149,6 @@ public class MilleDix extends Game<MDPlayer>{
 		startTurnTime(); //On redémarre le compteur de tour pour le nouveau joueur
 	}
 	
-	/**
-	 * Actualise le scoreboard afin d'afficher les informations correctes en ce
-	 * qui concerne les points, le temps de partie, le temps du tour etc.
-	 */
-	public void updateScoreboard(){
-		
-		int rs = Main.getInstance().get(Main.getInstance().getRedUUID()).getScore(); //Score du rouge
-		int gs = Main.getInstance().get(Main.getInstance().getGreenUUID()).getScore();; //Score du vert
-		
-		String rName = Main.getInstance().get(Main.getInstance().getRedUUID()).getbPlayer().getName(); //Pseudo du rouge
-		String gName = Main.getInstance().get(Main.getInstance().getGreenUUID()).getbPlayer().getName(); //Pseudo du vert
-		
-		if(rName.length() >= 12){
-			rName = rName.substring(0, 10) + ".";
-		}
-		if(gName.length() >= 12){
-			gName = gName.substring(0, 10) + ".";
-		}
-
-		/* On parcours le HashMap afin de trouver les joueurs verts et rouges, puis
-		 * on récupère leurs scores et leur pseudo par l'intermédiaire du HashMap,
-		 * et on les stocke dans rs, gs, rName, et gName.
-		 */
-	
-		//On définit les score puis on les affiche
-		
-		redScore = objective.getScore(ChatColor.RED + rName + " : ");
-		redScore.setScore(rs);
-		
-		greenScore = objective.getScore(ChatColor.GREEN + gName + " : ");		
-		greenScore.setScore(gs);
-	
-		timeScore = objective.getScore(ChatColor.AQUA + "Temps restant:");
-		timeScore.setScore((int)timeRemaining);
-		
-		turnTimeScore = objective.getScore(ChatColor.AQUA + "Temps tour:");
-		turnTimeScore.setScore((int)turnTime);
-		
-		
-		//On envoie le scoreboard à tous les joueurs
-		for(Player pls : Bukkit.getOnlinePlayers()){
-			pls.setScoreboard(board);
-		}
-		
-	}
 
 	/**
 	 * Fonction chargée du temps : compte à rebours du temps de partie et non pas du temps de tour.
@@ -225,7 +162,7 @@ public class MilleDix extends Game<MDPlayer>{
 					endGame(getLoser(Main.getInstance().getGamePlayers().get(Main.getInstance().getGreenUUID()), Main.getInstance().getGamePlayers().get(Main.getInstance().getRedUUID())), false);
 				}
 				//A chaque tour, on actualise le compteur, on décrémente le temps, et on remet le jour.
-				updateScoreboard();
+				scoreboardManager.updateScoreboard((int) timeRemaining, (int) turnTime);
 				timeRemaining--;
 				Bukkit.getWorld("MDMap").setTime(1000);
 			}
@@ -311,13 +248,28 @@ public class MilleDix extends Game<MDPlayer>{
 	 * booléen vaut <b>true</b>, le joueur passé en paramètre perdra 100 points.
 	 */
 	public void endGame(MDPlayer p, boolean causeCannotPlace){ //Recoit en paramètre le PERDANT SI causeCannotPlace = true
+		this.timeRemaining = 0;
+		this.turnTime = 0;
 		Terminator terminator = new Terminator(this);
 		terminator.endGame(p, causeCannotPlace);	
 	}
 
+	/**
+	 * @return Renvoie le scoreboardManager de l'instance du jeu. Le scoreboardManager est utilisé pour gérer le 
+	 * scoreboard : <br>
+	 * l'actualiser, changer les informations relatives au score, au temps...
+	 */
+	public GameScoreboardManager getGameScoreboardManager(){
+		return this.scoreboardManager;
+	}
 	
-	
-	
+	/**
+	 * Définit le scoreboardManager sur le nouveau GameScoreboardManager passé en paramètre.
+	 * @param newGameScoreboardManager Nouveau GameScoreboardManager qui remplacera l'actuel.
+	 */
+	public void setGameScoreboardManager(GameScoreboardManager newGameScoreboardManager){
+		this.scoreboardManager = newGameScoreboardManager;
+	}
 
 	
 }

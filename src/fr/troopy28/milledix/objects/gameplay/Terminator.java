@@ -36,7 +36,7 @@ public class Terminator {
 		if(causeCannotPlace && p != null)
 			p.decreaseScore(100); //On enlève 100 points au perdant	si il perd parce qu'il ne peut pas placer sa forme
 		
-		instance.updateScoreboard(); //On affiche le nouveau scoreboard	
+		instance.getGameScoreboardManager().updateScoreboard(0, 0); //On affiche le nouveau scoreboard	avec les temps à zéro car la partie est terminée.
 
 		for(String key : Main.getInstance().getGamePlayers().keySet()){
 			Main.getInstance().get(key).setupWaitingInventory(); //On donne l'inventaire d'attente à tout le monde 

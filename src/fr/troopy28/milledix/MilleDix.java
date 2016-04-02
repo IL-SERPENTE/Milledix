@@ -28,7 +28,7 @@ public class MilleDix extends Game<MDPlayer>{
 	private GameScoreboardManager scoreboardManager;
 	
 	//Tâches
-	private BukkitTask task;	
+	private BukkitTask task;
 	private BukkitTask turnTask;
 
 	//Config
@@ -42,7 +42,7 @@ public class MilleDix extends Game<MDPlayer>{
 	 * <h2>Constructeur</h2> Crée un objet de lecture de config JSON. Définit les objets nécessaires à la 
 	 * gestion du scoreboard. Récupère ensuite la configuration.
 	 */
-	public MilleDix(String gameCodeName, String gameName, String gameDescription, Class<MDPlayer> gamePlayerClass) {		
+	public MilleDix(String gameCodeName, String gameName, String gameDescription, Class<MDPlayer> gamePlayerClass) {
 		
 		super(gameCodeName, gameName, gameDescription, gamePlayerClass);
 		scoreboardManager = new GameScoreboardManager();
@@ -65,10 +65,10 @@ public class MilleDix extends Game<MDPlayer>{
 	@Override
 	public void startGame()
 	{
+	    super.startGame();
 		manageTime();
 		Main.getInstance().setGameState(GameState.GAME);
 		greenTurn();
-	    super.startGame();
 	}	
 	
 	/**
@@ -137,9 +137,9 @@ public class MilleDix extends Game<MDPlayer>{
 		GridAnalyser ga = new GridAnalyser(p);	
 		ga.killBadIron();
 		
-		p.stopPlaying();//Il arrête de jouer
+		p.stopPlaying(); //Il arrête de jouer
 		turnTask.cancel(); //On éteint son compteur de tour
-		if(checkPointLimit(p))//On vérifie s'il dépasse ou a au moins la limite de points. Si oui, on sort pour ne pas relancer de tour
+		if(checkPointLimit(p)) //On vérifie s'il dépasse ou a au moins la limite de points. Si oui, on sort pour ne pas relancer de tour
 			return;
 		for(String key : Main.getInstance().getGamePlayers().keySet()){ //On parcours le HashMap afin de trouver le joueur qui joue
 			if(Main.getInstance().get(key).getbPlayer().getName() != p.getbPlayer().getName())
@@ -165,6 +165,7 @@ public class MilleDix extends Game<MDPlayer>{
 				scoreboardManager.updateScoreboard((int) timeRemaining, (int) turnTime);
 				timeRemaining--;
 				Bukkit.getWorld("MDMap").setTime(1000);
+				Bukkit.getWorld("MDMap").setStorm(false);
 			}
 			
 		}, 20, 20);
@@ -252,6 +253,7 @@ public class MilleDix extends Game<MDPlayer>{
 		this.turnTime = 0;
 		Terminator terminator = new Terminator(this);
 		terminator.endGame(p, causeCannotPlace);	
+		
 	}
 
 	/**

@@ -34,6 +34,10 @@ public class Main extends JavaPlugin{
 	private MilleDix myGame;
 	private Logger log;	
 	
+	@Override
+	public void onLoad(){
+		
+	}
 	
 	/**
 	 * Se déclenche au démarrage du plugin.
@@ -42,25 +46,31 @@ public class Main extends JavaPlugin{
 	 */
 	@Override
 	public void onEnable(){
-
+		//Sur la ligne ci-dessous, SonarLint n'est pas content. J'ai préféré m'en remettre aux compétences humaines d'AmauryPi qui n'a pas trouvé d'utilité à setupStatics() que l'analyse de base de Sonar.		
 		instance = this; // NOSONAR
 		log  = Bukkit.getLogger();
-	
+		
 		//On gère le monde
 		WorldFactory mapMaker = new WorldFactory("MDMap");
 		mapMaker.generateWorld();
 		mapMaker.buildGrid();
+		//On redéfinit le GameState
+		gameState = GameState.PRE_GAME;
 		
 		//On enregistre les événements
 		registerEvents();
 		
 		myGame = new MilleDix("MilleDix", "MilleDix", "Reprise de l'application SmartPhone MillDix", MDPlayer.class);
-		SamaGamesAPI.get().getGameManager().registerGame(myGame);
 		
-		
-		//Sur la ligne ci-dessous, SonarLint n'est pas content. J'ai préféré m'en remettre aux compétences humaines d'AmauryPi qui n'a pas trouvé d'utilité à SetupStatics() que l'analyse de base de Sonar.		
-		gameState = GameState.PRE_GAME;
+		//Si le jeu est déjà enregistré, on ne l'enregistre pas à nouveau TODO vérifier l'utilité
+		if(SamaGamesAPI.get().getGameManager().getGame() == null){
+			SamaGamesAPI.get().getGameManager().registerGame(myGame);	
+		}
+		else if(SamaGamesAPI.get().getGameManager().getGame().getGameName() != myGame.getGameName()){
+			SamaGamesAPI.get().getGameManager().registerGame(myGame);	
+		}
 	}
+
 	
 	/**
 	 * Est appelée à l'arrêt du plugin. Il éteint toutes les tâches du plugin, efface la liste des joueurs, redéfinit le délai d'attente sur 11 et redéfini l'état de jeu sur "Fin de partie".

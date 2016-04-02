@@ -2,11 +2,11 @@ package fr.troopy28.milledix.objects.gameplay;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
-import org.bukkit.entity.Player;
 
 import fr.troopy28.milledix.Main;
 import fr.troopy28.milledix.MilleDix;
 import fr.troopy28.milledix.utils.ChatUtils;
+import net.samagames.api.SamaGamesAPI;
 
 public class Terminator {
 
@@ -44,7 +44,6 @@ public class Terminator {
 		
 		Bukkit.getScheduler().cancelTasks(Main.getInstance()); //On arrête toutes les tâches
 		
-		Bukkit.broadcastMessage(ChatColor.RED + "-----------------------------------------------------");
 		Bukkit.broadcastMessage(ChatUtils.getGamePrefix() + ChatColor.GREEN + "La partie est terminée !");		
 		
 		//On récupère le gagnant. Vaut null en cas d'égalité
@@ -53,12 +52,12 @@ public class Terminator {
 		if(winner == null || p == null){ //Si il y a égalité
 			Bukkit.broadcastMessage(ChatUtils.getGamePrefix() + ChatColor.AQUA + "Il y a égalité ! Félicitations à vous deux !");
 		}else{
-			Bukkit.broadcastMessage(ChatUtils.getGamePrefix() + ChatColor.AQUA + "Le joueur " + ChatColor.GOLD + ChatColor.BOLD + winner.getbPlayer().getName() + ChatColor.RESET +  ChatColor.AQUA + " a gagné la partie ! Félicitations !");
+			SamaGamesAPI.get().getGameManager().getCoherenceMachine().getTemplateManager().getPlayerWinTemplate().execute(winner.getbPlayer());
 		}
 		
-		Bukkit.broadcastMessage(ChatColor.RED + "-----------------------------------------------------");
 		rewardPlayers(winner);
 		cleanServer();
+		
 	}
 	
 	/**
@@ -66,15 +65,9 @@ public class Terminator {
 	 */
 	private void cleanServer(){
 		Bukkit.getScheduler().runTaskLater(Main.getInstance(), new Runnable(){
-
 			public void run() {
-				for(Player pls : Bukkit.getOnlinePlayers()){
-					pls.kickPlayer(ChatColor.GREEN + "La partie est terminée! Le plugin va procéder à un redémarrage!");
-				}
-				Bukkit.getPluginManager().disablePlugin(Main.getInstance());
-				Bukkit.getPluginManager().enablePlugin(Main.getInstance());
+				MilleDix.getGameInstance().handleGameEnd();				
 			}
-			
 		}, 320);
 	}
 	
@@ -85,15 +78,19 @@ public class Terminator {
 	 * @param winner MDPlayer représentant le gagnant.
 	 */
 	private void rewardPlayers(MDPlayer winner){
+		
 		MDPlayer loser = null;
+		
 		for(String key : Main.getInstance().getGamePlayers().keySet()){ 
 			if(Main.getInstance().get(key).getColor() != winner.getColor())
 				loser = Main.getInstance().get(key);
 		}
-		winner.addCoins(getWinnerCoins(winner, loser), ChatColor.WHITE + "Vous avez gagné au " + ChatColor.AQUA + "MilleDix!");
-		winner.addStars(1, "Vous avez gagné au " + ChatColor.AQUA + "MilleDix!");
 		
-		loser.addCoins(getLoserCoins(loser), ChatColor.WHITE +  "Vous avez joué au " + ChatColor.AQUA + "MilleDix!");
+		winner.addCoins(getWinnerCoins(winner, loser), ChatColor.WHITE + "Vous avez gagné au " + ChatColor.AQUA + "MilleDix" + ChatColor.WHITE + "!" + ChatColor.GOLD);
+		winner.addStars(1, "Vous avez gagné au " + ChatColor.AQUA + "MilleDix!");		
+		MilleDix.getGameInstance().effectsOnWinner(winner.getbPlayer());
+		
+		loser.addCoins(getLoserCoins(loser), ChatColor.WHITE +  "Vous avez joué au " + ChatColor.AQUA + "MilleDix" + ChatColor.WHITE + "!" + ChatColor.GOLD);	
 	}
 
 	/**
@@ -118,6 +115,5 @@ public class Terminator {
 			result = 5;
 		return result;
 	}
-	
 	
 }

@@ -94,8 +94,7 @@ public class MDPlayer extends GamePlayer{
 	/**
 	 * Donne au joueur son armure de couleur.
 	 */
-	private void preparePlayer(){
-				
+	private void preparePlayer(){			
 		//Armure de la couleur définie
 		ItemStack helmet = new ItemStack(Material.LEATHER_HELMET, 1);
 		ItemStack boots = new ItemStack(Material.LEATHER_BOOTS, 1);
@@ -203,6 +202,7 @@ public class MDPlayer extends GamePlayer{
 		this.bPlayer.getInventory().clear();
 		giveRandomForm();
 		giveHighlightButton();
+		preparePlayer();
 		this.isPlaying = true;
 		sendTitle(ChatColor.AQUA + "A vous de jouer !", "Placer votre forme sur la grille !", 3);
 		this.bPlayer.updateInventory();
@@ -211,7 +211,6 @@ public class MDPlayer extends GamePlayer{
 		if(!(ga.checkCanPlace())){ //Si il est impossible pour un joueur de poser sa forme, le joueur perd et la partie se termine
 			Bukkit.broadcastMessage(ChatUtils.getGamePrefix() + ChatColor.WHITE + "Le joueur " + ChatColor.AQUA + this.bPlayer.getName() + ChatColor.WHITE + " n'a pas pu poser sa forme ! La partie est terminée !");
 			MilleDix.getGameInstance().endGame(this, true); //True -> il n'a pas pu poser sa forme
-
 		}		
 	}
 	
@@ -222,6 +221,7 @@ public class MDPlayer extends GamePlayer{
 	public void stopPlaying(){
 		this.isPlaying = false;
 		this.bPlayer.getInventory().clear();
+		preparePlayer();
 		if(this.form != null)
 			this.form.clearAllArrayLists();
 		this.form = null;

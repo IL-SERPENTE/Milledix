@@ -1,10 +1,20 @@
 package fr.troopy28.milledix.objects.form;
 
-/**
- * Classe gérant les types de forme utilisables par MDForm.
- * Elle contient tous les types de formes possibles, et une fonction
- * permettant de récupérer le type de forme attribué à un nombre donné.
- * @author troopy28
+/*
+ * This file is part of Milledix.
+ *
+ * Milledix is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Milledix is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Milledix.  If not, see <http://www.gnu.org/licenses/>.
  */
 public enum FormType {
 	
